@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🌟 हिंदी मज़ेदार क्विज़</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Hind:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --saffron:#FF6B2B;--green:#138808;--blue:#1565C0;--yellow:#FFD740;
+  --pink:#E91E8C;--purple:#7B1FA2;--mint:#00897B;
+  --correct:#2E7D32;--wrong:#C62828;
+  --bg:#FFFBF5;--card:#FFFFFF;--text:#1A0A00;--soft:#6D4C41;--border:#F0D9C8;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Hind','Nunito',sans-serif;background:var(--bg);min-height:100vh;overflow-x:hidden;}
+
+/* ── BG ── */
+.bg-layer{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.bg-blob{position:absolute;border-radius:50%;opacity:.08;animation:blobFloat 9s ease-in-out infinite;}
+.bg-blob:nth-child(1){width:350px;height:350px;background:var(--saffron);top:-120px;left:-100px;}
+.bg-blob:nth-child(2){width:250px;height:250px;background:var(--green);top:35%;right:-80px;animation-delay:3s}
+.bg-blob:nth-child(3){width:300px;height:300px;background:var(--blue);bottom:-80px;left:25%;animation-delay:6s}
+.bg-blob:nth-child(4){width:200px;height:200px;background:var(--yellow);bottom:20%;left:-60px;animation-delay:1.5s}
+@keyframes blobFloat{0%,100%{transform:translateY(0)scale(1)}50%{transform:translateY(-22px)scale(1.05)}}
+.float-em{position:fixed;pointer-events:none;z-index:0;font-size:1.1rem;animation:floatUp linear infinite;}
+@keyframes floatUp{0%{transform:translateY(110vh)rotate(0deg);opacity:0}10%{opacity:.4}90%{opacity:.4}100%{transform:translateY(-10vh)rotate(360deg);opacity:0}}
+.burst-wrap{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
+.burst-p{position:absolute;animation:burstOut 1s ease-out forwards;font-size:1.5rem;}
+@keyframes burstOut{0%{opacity:1;transform:translate(0,0)scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy))scale(.2)}}
+
+/* ── SHARED ── */
+.screen{display:none;min-height:100vh;position:relative;z-index:1;}
+.screen.active{display:block;}
+.tricolor{height:5px;width:180px;border-radius:6px;margin:0 auto 16px;background:linear-gradient(90deg,#FF6B2B 33%,#f5f5f5 33% 66%,#138808 66%);}
+@keyframes bounce{0%,100%{transform:translateY(0)rotate(-3deg)}50%{transform:translateY(-14px)rotate(3deg)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(20px)scale(.97)}to{opacity:1;transform:translateY(0)scale(1)}}
+@keyframes fbIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popCorrect{0%{transform:scale(1)}45%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes shakeWrong{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+@keyframes emIn{from{opacity:0;transform:scale(.3)rotate(-15deg)}to{opacity:1;transform:scale(1)rotate(0deg)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── BOTTOM NAV ── */
+.bnav{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:rgba(255,251,245,.96);backdrop-filter:blur(12px);
+  border-top:2px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;
+  padding:8px 0 max(8px,env(safe-area-inset-bottom));
+  box-shadow:0 -4px 20px rgba(0,0,0,.07);
+}
+.bnav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 16px;border:none;background:none;cursor:pointer;-webkit-appearance:none;border-radius:14px;transition:all .2s;}
+.bnav-btn:active{transform:scale(.93);}
+.bnav-icon{font-size:1.5rem;line-height:1;}
+.bnav-lbl{font-size:.62rem;font-weight:800;color:var(--soft);letter-spacing:.3px;font-family:'Nunito',sans-serif;}
+.bnav-btn.active .bnav-icon{filter:drop-shadow(0 2px 6px rgba(255,107,43,.5));}
+.bnav-btn.active .bnav-lbl{color:var(--saffron);}
+.bnav-btn.active{background:rgba(255,107,43,.08);}
+
+/* ── HOME ── */
+#homeScreen{padding:24px 16px 90px;}
+.home-header{text-align:center;padding-bottom:18px;}
+.h-mascot{font-size:4.5rem;display:block;animation:bounce 1.8s ease-in-out infinite;filter:drop-shadow(0 6px 14px rgba(0,0,0,.15));margin-bottom:6px;}
+.h-title{font-family:'Nunito',sans-serif;font-size:clamp(1.8rem,7vw,2.6rem);font-weight:900;background:linear-gradient(135deg,#FF6B2B,#FFD740,#138808,#1565C0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;margin-bottom:4px;}
+.h-sub{font-size:.9rem;color:var(--soft);font-weight:700;}
+.section-label{font-family:'Nunito',sans-serif;font-weight:900;font-size:.8rem;color:var(--soft);letter-spacing:1.5px;text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Full quiz card */
+.full-card{background:linear-gradient(135deg,#FF6B2B,#FFD740);border-radius:22px;padding:20px 22px;cursor:pointer;box-shadow:0 8px 28px rgba(255,107,43,.35);display:flex;align-items:center;gap:14px;margin-bottom:6px;transition:all .25s cubic-bezier(.34,1.56,.64,1);border:none;width:100%;-webkit-appearance:none;}
+.full-card:active{transform:scale(.97);}
+.fc-em{font-size:2.8rem;flex-shrink:0;}
+.fc-info{flex:1;text-align:left;}
+.fc-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.25rem;color:white;margin-bottom:2px;}
+.fc-sub{font-size:.8rem;color:rgba(255,255,255,.85);font-weight:600;}
+.fc-arr{font-size:1.5rem;color:rgba(255,255,255,.8);}
+
+/* Section grid */
+.sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sec-card{background:white;border:2px solid var(--border);border-radius:18px;padding:14px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;transition:all .22s cubic-bezier(.34,1.56,.64,1);box-shadow:0 3px 12px rgba(0,0,0,.06);-webkit-appearance:none;position:relative;overflow:hidden;}
+.sec-card::before{content:'';position:absolute;inset:0;opacity:.06;border-radius:18px;}
+.sec-card:active{transform:scale(.95);}
+.sec-card .sc-em{font-size:2rem;line-height:1;}
+.sec-card .sc-name{font-family:'Hind',sans-serif;font-weight:700;font-size:.82rem;color:var(--text);line-height:1.3;}
+.sec-card .sc-count{font-family:'Nunito',sans-serif;font-weight:800;font-size:.7rem;color:var(--soft);background:var(--bg);border-radius:10px;padding:2px 8px;}
+.sec-card .sc-pct{position:absolute;top:8px;right:8px;font-size:.65rem;font-weight:800;border-radius:10px;padding:2px 6px;font-family:'Nunito',sans-serif;}
+.sec-card .sc-bar{width:100%;height:4px;background:#F0E0CF;border-radius:4px;overflow:hidden;margin-top:2px;}
+.sec-bar-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+
+/* ── QUIZ ── */
+#quizScreen{padding:0 0 90px;}
+.topbar{background:white;padding:10px 14px 8px;border-bottom:3px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 3px 14px rgba(0,0,0,.07);}
+.topbar::before{content:'';display:block;height:4px;width:100%;background:linear-gradient(90deg,#FF6B2B 33%,#eee 33% 66%,#138808 66%);margin-bottom:8px;border-radius:2px;}
+.topbar-r1{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.topbar-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(.9rem,3.5vw,1.1rem);background:linear-gradient(135deg,#FF6B2B,#138808);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.topbar-back{background:var(--bg);border:2px solid var(--border);border-radius:12px;padding:5px 12px;font-size:.75rem;font-weight:800;color:var(--soft);cursor:pointer;-webkit-appearance:none;font-family:'Nunito',sans-serif;}
+.pills{display:flex;gap:5px;}
+.pill{display:flex;align-items:center;gap:3px;border-radius:16px;padding:3px 8px;font-weight:800;font-size:.75rem;color:var(--text);border:2px solid var(--border);}
+.pill-star{background:linear-gradient(135deg,#FFF9C4,#FFF3E0);border-color:#FFD740;}
+.pill-ok{background:linear-gradient(135deg,#E8F5E9,#DCEDC8);border-color:#66BB6A;}
+.pill-no{background:linear-gradient(135deg,#FFEBEE,#FFCDD2);border-color:#EF5350;}
+.prog-wrap{height:9px;background:#F0E0CF;border-radius:9px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:9px;background:linear-gradient(90deg,#FF6B2B,#FFD740,#138808);transition:width .5s cubic-bezier(.34,1.56,.64,1);}
+.prog-txt{font-size:.68rem;font-weight:700;color:var(--soft);text-align:right;margin-top:2px;}
+.stars-row{display:flex;flex-wrap:wrap;gap:3px;padding:6px 14px 2px;justify-content:center;}
+.ms{font-size:.78rem;opacity:.18;transition:all .4s cubic-bezier(.34,1.56,.64,1);}
+.ms.lit{opacity:1;transform:scale(1.4);}
+
+.q-area{padding:10px 14px 0;position:relative;z-index:1;}
+.cat-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:20px;font-weight:800;font-size:.78rem;color:white;margin-bottom:10px;box-shadow:0 3px 10px rgba(0,0,0,.2);font-family:'Nunito',sans-serif;}
+.vis-card{border-radius:20px;overflow:hidden;margin-bottom:12px;box-shadow:0 5px 20px rgba(0,0,0,.09);border:2px solid var(--border);background:white;}
+.vis-img{width:100%;min-height:110px;max-height:155px;display:flex;align-items:center;justify-content:center;padding:12px;position:relative;overflow:hidden;}
+.vis-scene{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;width:100%;}
+.em-big{font-size:clamp(2.6rem,11vw,4rem);line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.14));animation:emIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+.em-med{font-size:clamp(1.8rem,7.5vw,2.8rem);line-height:1;filter:drop-shadow(0 3px 6px rgba(0,0,0,.12));animation:emIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+.vis-lbl{position:absolute;bottom:5px;right:9px;background:rgba(0,0,0,.12);color:white;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:9px;}
+.q-card{background:white;border-radius:18px;padding:14px 16px 16px;box-shadow:0 4px 18px rgba(0,0,0,.07);border:2px solid var(--border);margin-bottom:10px;animation:cardIn .4s cubic-bezier(.34,1.56,.64,1);}
+.q-type-tag{font-size:.65rem;font-weight:800;color:var(--soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.q-text{font-family:'Hind',sans-serif;font-size:clamp(1rem,4vw,1.2rem);font-weight:700;color:var(--text);line-height:1.5;}
+.q-blank{display:inline-block;min-width:50px;border-bottom:3px solid var(--saffron);color:var(--saffron);font-style:italic;padding:0 3px;}
+.opts-wrap{display:flex;flex-direction:column;gap:8px;padding:0 14px;}
+.opt-btn{width:100%;padding:12px 14px;border-radius:14px;border:2.5px solid var(--border);background:white;color:var(--text);font-family:'Hind',sans-serif;font-size:clamp(.95rem,3.8vw,1.05rem);font-weight:600;text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .2s cubic-bezier(.34,1.56,.64,1);-webkit-appearance:none;position:relative;overflow:hidden;min-height:50px;}
+.opt-btn:active:not(:disabled){transform:scale(.97);}
+.opt-letter{width:30px;height:30px;border-radius:50%;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;color:var(--soft);flex-shrink:0;transition:all .25s;font-family:'Nunito',sans-serif;}
+.opt-em{font-size:1.2rem;flex-shrink:0;}
+.opt-txt{flex:1;line-height:1.35;}
+.opt-result{font-size:1.1rem;opacity:0;transition:opacity .2s;margin-left:auto;flex-shrink:0;}
+.opt-btn.correct-ans{background:linear-gradient(135deg,#E8F5E9,#DCEDC8);border-color:var(--correct);animation:popCorrect .45s cubic-bezier(.34,1.56,.64,1);}
+.opt-btn.correct-ans .opt-letter{background:var(--correct);border-color:var(--correct);color:white;}
+.opt-btn.correct-ans .opt-result{opacity:1;}
+.opt-btn.wrong-ans{background:linear-gradient(135deg,#FFEBEE,#FFCDD2);border-color:var(--wrong);animation:shakeWrong .45s ease;}
+.opt-btn.wrong-ans .opt-letter{background:var(--wrong);border-color:var(--wrong);color:white;}
+.opt-btn.wrong-ans .opt-result{opacity:1;}
+.opt-btn.show-correct{background:linear-gradient(135deg,#E8F5E9,#DCEDC8);border-color:var(--correct);opacity:.8;}
+.opt-btn.show-correct .opt-letter{background:var(--correct);border-color:var(--correct);color:white;}
+.opt-btn.show-correct .opt-result{opacity:1;}
+.opt-btn:disabled{cursor:default;}
+.fb-box{margin:10px 14px 0;padding:12px 15px;border-radius:14px;font-weight:700;font-size:clamp(.85rem,3.4vw,.92rem);text-align:center;display:none;animation:fbIn .3s ease;line-height:1.4;font-family:'Hind',sans-serif;}
+.fb-ok{background:linear-gradient(135deg,#E8F5E9,#C8E6C9);color:#1B5E20;border:2px solid #A5D6A7;display:block;}
+.fb-no{background:linear-gradient(135deg,#FFEBEE,#FFCDD2);color:#B71C1C;border:2px solid #EF9A9A;display:block;}
+.next-btn{margin:11px 14px 0;width:calc(100% - 28px);padding:14px;border-radius:16px;border:none;background:linear-gradient(135deg,#FF6B2B,#138808);color:white;font-family:'Nunito',sans-serif;font-size:clamp(.95rem,4vw,1.1rem);font-weight:900;cursor:pointer;letter-spacing:.3px;box-shadow:0 5px 18px rgba(255,107,43,.32);display:none;transition:all .25s cubic-bezier(.34,1.56,.64,1);-webkit-appearance:none;animation:fbIn .3s ease;}
+.next-btn.show{display:block;}
+.next-btn:active{transform:scale(.97);}
+
+/* ── RESULT (end of quiz) ── */
+#resultScreen{padding:26px 16px 100px;text-align:center;animation:cardIn .5s cubic-bezier(.34,1.56,.64,1);}
+.res-trophy{font-size:clamp(3.5rem,15vw,6rem);display:block;animation:bounce 1.5s ease-in-out infinite;margin-bottom:8px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.2));}
+.res-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(1.7rem,6.5vw,2.3rem);background:linear-gradient(135deg,#FF6B2B,#FFD740);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:5px;}
+.res-sub{font-size:clamp(.88rem,3.4vw,1rem);color:var(--soft);font-weight:700;margin-bottom:14px;font-family:'Hind',sans-serif;}
+.res-stars{font-size:clamp(1.3rem,5vw,1.8rem);margin-bottom:16px;}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.res-box{background:white;border-radius:16px;padding:14px 10px;box-shadow:0 3px 12px rgba(0,0,0,.07);border:2px solid var(--border);}
+.res-val{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(1.8rem,8vw,2.5rem);display:block;line-height:1;}
+.res-lbl{font-size:.72rem;font-weight:700;color:var(--soft);margin-top:3px;}
+.res-box.g .res-val{color:var(--correct)}.res-box.r .res-val{color:var(--wrong)}
+.res-box.b .res-val{color:var(--blue)}.res-box.p .res-val{color:var(--purple)}
+.breakdown{text-align:left;margin-bottom:18px;}
+.breakdown h3{font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:9px;text-align:center;}
+.bd-row{display:flex;align-items:center;gap:9px;background:white;border-radius:12px;padding:8px 12px;margin-bottom:6px;border:2px solid var(--border);}
+.bd-name{flex:1;font-weight:700;font-size:.78rem;color:var(--text);font-family:'Hind',sans-serif;}
+.bd-bar-w{width:65px;height:7px;background:#F0E0CF;border-radius:7px;overflow:hidden;}
+.bd-bar{height:100%;border-radius:7px;background:linear-gradient(90deg,#FF6B2B,#138808);}
+.bd-sc{font-weight:800;font-size:.75rem;color:var(--soft);min-width:26px;text-align:right;font-family:'Nunito',sans-serif;}
+.res-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.res-btn{flex:1;min-width:120px;padding:14px;border-radius:18px;border:none;color:white;font-family:'Nunito',sans-serif;font-size:clamp(.9rem,3.8vw,1.05rem);font-weight:900;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);-webkit-appearance:none;}
+.res-btn:active{transform:scale(.96);}
+.res-btn.primary{background:linear-gradient(135deg,#FFD740,#FF6B2B);box-shadow:0 6px 20px rgba(255,107,43,.4);}
+.res-btn.secondary{background:linear-gradient(135deg,#1565C0,#138808);box-shadow:0 6px 20px rgba(21,101,192,.3);}
+
+/* ── PROFILE ── */
+#profileScreen{padding:16px 16px 100px;}
+.prof-header{background:linear-gradient(135deg,#FF6B2B,#FFD740,#138808);border-radius:24px;padding:22px 20px;text-align:center;margin-bottom:18px;box-shadow:0 8px 28px rgba(255,107,43,.3);position:relative;overflow:hidden;}
+.prof-header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+.prof-avatar{font-size:3.5rem;display:block;margin-bottom:6px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.2));}
+.prof-name-label{font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:700;color:rgba(255,255,255,.75);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
+.prof-name{font-family:'Nunito',sans-serif;font-size:1.5rem;font-weight:900;color:white;margin-bottom:2px;}
+.prof-badge{display:inline-block;background:rgba(255,255,255,.22);color:white;border-radius:12px;padding:4px 14px;font-size:.78rem;font-weight:800;font-family:'Nunito',sans-serif;}
+.prof-edit-name{display:flex;gap:8px;margin-bottom:16px;}
+.prof-edit-name input{flex:1;padding:10px 14px;border-radius:12px;border:2px solid var(--border);font-family:'Hind',sans-serif;font-size:.95rem;font-weight:600;background:white;color:var(--text);-webkit-appearance:none;outline:none;}
+.prof-edit-name input:focus{border-color:var(--saffron);}
+.prof-edit-name button{padding:10px 16px;border-radius:12px;border:none;background:linear-gradient(135deg,#FF6B2B,#FFD740);color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:.85rem;cursor:pointer;-webkit-appearance:none;}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+.stat-box{background:white;border:2px solid var(--border);border-radius:16px;padding:14px 10px;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.06);}
+.stat-val{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.6rem;display:block;line-height:1;}
+.stat-lbl{font-size:.65rem;font-weight:700;color:var(--soft);margin-top:3px;}
+.sv-orange{color:var(--saffron)}.sv-green{color:var(--green)}.sv-blue{color:var(--blue)}
+
+/* section performance in profile */
+.perf-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:.8rem;color:var(--soft);letter-spacing:1.5px;text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;gap:8px;}
+.perf-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.perf-row{background:white;border:2px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.perf-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.perf-em{font-size:1.4rem;flex-shrink:0;}
+.perf-name{flex:1;font-family:'Hind',sans-serif;font-weight:700;font-size:.88rem;color:var(--text);}
+.perf-pct{font-family:'Nunito',sans-serif;font-weight:900;font-size:1rem;}
+.perf-bar-w{height:8px;background:#F0E0CF;border-radius:8px;overflow:hidden;}
+.perf-bar{height:100%;border-radius:8px;transition:width .8s ease;}
+.perf-sub{font-size:.68rem;color:var(--soft);font-weight:600;margin-top:4px;}
+
+/* ── HISTORY ── */
+#historyScreen{padding:16px 16px 100px;}
+.hist-header{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.4rem;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.hist-sub{font-size:.82rem;color:var(--soft);font-weight:600;margin-bottom:18px;}
+.hist-empty{text-align:center;padding:40px 20px;color:var(--soft);}
+.hist-empty .he-em{font-size:3.5rem;display:block;margin-bottom:10px;opacity:.5;}
+.hist-empty p{font-size:.9rem;font-weight:700;}
+.hist-card{background:white;border:2px solid var(--border);border-radius:18px;padding:15px 16px;margin-bottom:10px;box-shadow:0 3px 12px rgba(0,0,0,.06);animation:slideUp .3s ease both;}
+.hc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.hc-date{font-size:.75rem;font-weight:700;color:var(--soft);font-family:'Nunito',sans-serif;}
+.hc-mode{font-size:.7rem;font-weight:800;border-radius:10px;padding:3px 10px;font-family:'Nunito',sans-serif;}
+.hc-mode.full{background:linear-gradient(135deg,#FFF3E0,#FFE0B2);color:#E65100;}
+.hc-mode.section{background:linear-gradient(135deg,#E3F2FD,#BBDEFB);color:#1565C0;}
+.hc-score-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.hc-trophy{font-size:2rem;}
+.hc-score-info{flex:1;}
+.hc-pct{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.6rem;line-height:1;}
+.hc-detail{font-size:.75rem;color:var(--soft);font-weight:600;margin-top:2px;}
+.hc-bar-w{height:8px;background:#F0E0CF;border-radius:8px;overflow:hidden;flex:1;}
+.hc-bar{height:100%;border-radius:8px;}
+.hc-cats{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.hc-chip{font-size:.65rem;font-weight:700;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:2px 8px;color:var(--soft);font-family:'Nunito',sans-serif;}
+.clear-btn{width:100%;padding:12px;border-radius:14px;border:2px solid #FFCDD2;background:#FFEBEE;color:var(--wrong);font-family:'Nunito',sans-serif;font-weight:800;font-size:.88rem;cursor:pointer;-webkit-appearance:none;margin-top:10px;}
+
+/* badge colors */
+.b-mcq{background:linear-gradient(135deg,#E65100,#FF8A65);}
+.b-fill{background:linear-gradient(135deg,#1565C0,#64B5F6);}
+.b-qa{background:linear-gradient(135deg,#1B5E20,#66BB6A);}
+.b-tf{background:linear-gradient(135deg,#880E4F,#F48FB1);}
+.b-match{background:linear-gradient(135deg,#4A148C,#CE93D8);}
+.b-kriya{background:linear-gradient(135deg,#004D40,#4DB6AC);}
+.b-sangya{background:linear-gradient(135deg,#BF360C,#FFAB91);}
+.b-ginti{background:linear-gradient(135deg,#0D47A1,#90CAF9);}
+.b-varn{background:linear-gradient(135deg,#6A1B9A,#CE93D8);}
+
+@media(min-width:480px){
+  .opts-wrap,.q-area,.fb-box,.next-btn,.stars-row{max-width:480px;margin-left:auto;margin-right:auto;}
+  .next-btn{width:calc(100% - 28px);}
+  .sec-grid{max-width:480px;margin:0 auto;}
+  .full-card,.section-label,.perf-row,.hist-card,.res-grid,.res-btns,.stat-grid,.breakdown,.prof-edit-name{max-width:480px;margin-left:auto;margin-right:auto;}
+}
+</style>
+</head>
+<body>
+<div class="bg-layer">
+  <div class="bg-blob"></div><div class="bg-blob"></div>
+  <div class="bg-blob"></div><div class="bg-blob"></div>
+</div>
+<div class="burst-wrap" id="burst"></div>
+
+<!-- ═══════════ HOME ═══════════ -->
+<div id="homeScreen" class="screen active">
+  <div class="home-header">
+    <span class="h-mascot" id="hMascot">🦚</span>
+    <div class="tricolor"></div>
+    <div class="h-title">हिंदी मज़ेदार क्विज़!</div>
+    <p class="h-sub">सभी विषय • चित्रों के साथ • अभी सीखो! 🎨</p>
+  </div>
+
+  <div class="section-label">🚀 पूरी क्विज़</div>
+  <button class="full-card" onclick="startQuiz('all')">
+    <span class="fc-em">📚</span>
+    <div class="fc-info">
+      <div class="fc-title">सभी प्रश्न एक साथ</div>
+      <div class="fc-sub">60 प्रश्न • सभी विषय</div>
+    </div>
+    <span class="fc-arr">➡️</span>
+  </button>
+
+  <div class="section-label">📂 विषय चुनकर अभ्यास करो</div>
+  <div class="sec-grid" id="secGrid"><!-- filled by JS --></div>
+</div>
+
+<!-- ═══════════ QUIZ ═══════════ -->
+<div id="quizScreen" class="screen">
+  <div class="topbar">
+    <div class="topbar-r1">
+      <button class="topbar-back" onclick="confirmBack()">← वापस</button>
+      <div class="topbar-title" id="topbarTitle">हिंदी क्विज़</div>
+      <div class="pills">
+        <div class="pill pill-ok">✅<span id="cScore">0</span></div>
+        <div class="pill pill-no">❌<span id="wScore">0</span></div>
+      </div>
+    </div>
+    <div class="prog-wrap"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="prog-txt" id="progTxt">प्रश्न 1 / 60</div>
+  </div>
+  <div class="stars-row" id="starsRow"></div>
+  <div class="q-area">
+    <div class="cat-badge" id="catBadge">✅ सही विकल्प</div>
+    <div class="vis-card" id="visCard">
+      <div class="vis-img" id="visImg">
+        <div class="vis-scene" id="visScene"></div>
+        <span class="vis-lbl" id="visLbl"></span>
+      </div>
+    </div>
+    <div class="q-card">
+      <div class="q-type-tag" id="qTypeTag"></div>
+      <div class="q-text" id="qText">लोड हो रहा है...</div>
+    </div>
+  </div>
+  <div class="opts-wrap" id="optsWrap"></div>
+  <div class="fb-box" id="fbBox"></div>
+  <button class="next-btn" id="nextBtn" onclick="nextQ()">आगे बढ़ो ➡️</button>
+</div>
+
+<!-- ═══════════ RESULT ═══════════ -->
+<div id="resultScreen" class="screen">
+  <span class="res-trophy" id="resTrophy">🏆</span>
+  <div class="res-title" id="resTitle">शाबाश!</div>
+  <div class="res-sub" id="resSub">क्विज़ पूरी हुई!</div>
+  <div class="res-stars" id="resStars"></div>
+  <div class="res-grid">
+    <div class="res-box g"><span class="res-val" id="rC">0</span><div class="res-lbl">✅ सही</div></div>
+    <div class="res-box r"><span class="res-val" id="rW">0</span><div class="res-lbl">❌ गलत</div></div>
+    <div class="res-box b"><span class="res-val" id="rT">0</span><div class="res-lbl">📝 कुल</div></div>
+    <div class="res-box p"><span class="res-val" id="rP">0%</span><div class="res-lbl">🎯 स्कोर</div></div>
+  </div>
+  <div class="breakdown"><h3>📊 विषय-वार प्रदर्शन</h3><div id="bdWrap"></div></div>
+  <div class="res-btns">
+    <button class="res-btn primary" onclick="playAgain()">🔄 फिर खेलो</button>
+    <button class="res-btn secondary" onclick="goHome()">🏠 घर जाओ</button>
+  </div>
+</div>
+
+<!-- ═══════════ PROFILE ═══════════ -->
+<div id="profileScreen" class="screen">
+  <div class="prof-header">
+    <span class="prof-avatar" id="profAvatar">🦚</span>
+    <div class="prof-name-label">खिलाड़ी का नाम</div>
+    <div class="prof-name" id="profName">बच्चा</div>
+    <span class="prof-badge" id="profBadge">🌟 नया सितारा</span>
+  </div>
+  <div class="prof-edit-name" style="max-width:480px;margin:0 auto 16px;">
+    <input type="text" id="nameInput" placeholder="अपना नाम लिखो..." maxlength="20">
+    <button onclick="saveName()">💾 सेव</button>
+  </div>
+  <div class="stat-grid" style="max-width:480px;margin:0 auto 0;">
+    <div class="stat-box"><span class="stat-val sv-orange" id="stTotal">0</span><div class="stat-lbl">कुल क्विज़</div></div>
+    <div class="stat-box"><span class="stat-val sv-green" id="stAvg">0%</span><div class="stat-lbl">औसत स्कोर</div></div>
+    <div class="stat-box"><span class="stat-val sv-blue" id="stBest">0%</span><div class="stat-lbl">सर्वश्रेष्ठ</div></div>
+  </div>
+  <div class="perf-title" style="max-width:480px;margin:18px auto 10px;">📈 विषय-वार प्रदर्शन</div>
+  <div id="perfWrap" style="max-width:480px;margin:0 auto;"></div>
+</div>
+
+<!-- ═══════════ HISTORY ═══════════ -->
+<div id="historyScreen" class="screen">
+  <div class="hist-header">📋 पिछले परिणाम</div>
+  <div class="hist-sub">तुम्हारी सारी क्विज़ यहाँ दिखती हैं</div>
+  <div id="histWrap"></div>
+  <button class="clear-btn" id="clearBtn" onclick="clearHistory()" style="display:none;">🗑️ सारे परिणाम हटाएँ</button>
+</div>
+
+<!-- ═══════════ BOTTOM NAV ═══════════ -->
+<nav class="bnav" id="mainNav">
+  <button class="bnav-btn active" id="nav-home" onclick="showScreen('home')">
+    <span class="bnav-icon">🏠</span><span class="bnav-lbl">घर</span>
+  </button>
+  <button class="bnav-btn" id="nav-history" onclick="showScreen('history')">
+    <span class="bnav-icon">📋</span><span class="bnav-lbl">इतिहास</span>
+  </button>
+  <button class="bnav-btn" id="nav-profile" onclick="showScreen('profile')">
+    <span class="bnav-icon">👤</span><span class="bnav-lbl">प्रोफ़ाइल</span>
+  </button>
+</nav>
+
+<script>
+// ════════════════════════════════════════════════════════
+// STORAGE  (localStorage fallback for non-artifact env)
+// ════════════════════════════════════════════════════════
+const STORE_KEY = 'hindiQuizData_v2';
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {name:'', history:[], catStats:{}};
+}
+function saveData(d){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){}
+}
+let DB = loadData();
+
+// ════════════════════════════════════════════════════════
+// SCENES
+// ════════════════════════════════════════════════════════
+const S = {
+  khilona:{bg:"#FFF3E0",m:["🧸","🪀","🎮"],l:"खिलौने"},
+  baccha:{bg:"#E8F5E9",m:["👦"],l:"बच्चा"},
+  chand:{bg:"#E8EAF6",m:["🌙","⭐"],l:"चाँद"},
+  suraj:{bg:"#FFFDE7",m:["☀️"],l:"सूरज"},
+  nana:{bg:"#FFF9E6",m:["👴"],l:"नाना"},
+  bazaar:{bg:"#FFF3E0",m:["🏪","🛒"],l:"बाज़ार"},
+  mela:{bg:"#FCE4EC",m:["🎡","🎠","🎪"],l:"मेला"},
+  vyakti:{bg:"#E8F4FD",m:["👤"],l:"व्यक्ति"},
+  prakruti:{bg:"#E8F5E9",m:["🌿","🌸","🌳"],l:"प्रकृति"},
+  murghi:{bg:"#FFF9C4",m:["🐔"],l:"मुर्गी"},
+  jamaal:{bg:"#FFF3E0",m:["👨‍🍳","🫓"],l:"जमाल"},
+  baadal:{bg:"#E3F2FD",m:["☁️","🌙"],l:"बादल"},
+  machli:{bg:"#E0F7FA",m:["🐟","💧"],l:"मछली"},
+  janmdin:{bg:"#FCE4EC",m:["🎂","🌳"],l:"जन्मदिन"},
+  jay:{bg:"#E8F5E9",m:["👦","🤝"],l:"जय"},
+  bhutta:{bg:"#FFFDE7",m:["🌽"],l:"भुट्टे"},
+  dhol:{bg:"#FFF3E0",m:["🥁"],l:"ढोल"},
+  hawa:{bg:"#E3F2FD",m:["🌬️","💨"],l:"हवा"},
+  beej:{bg:"#E8F5E9",m:["🌱","🪴"],l:"बीज"},
+  palak:{bg:"#E8F5E9",m:["🥬"],l:"पालक"},
+  chidiya:{bg:"#E3F2FD",m:["🐦","☁️"],l:"चिड़िया"},
+  sher:{bg:"#FFF9C4",m:["🦁"],l:"शेर"},
+  pensil:{bg:"#FFFDE7",m:["✏️"],l:"पेंसिल"},
+  ghar:{bg:"#E8F5E9",m:["🏠"],l:"घर"},
+  kitaab:{bg:"#E3F2FD",m:["📚"],l:"किताब"},
+  ladka:{bg:"#E8F4FD",m:["👦"],l:"लड़का"},
+  aam:{bg:"#FFF3E0",m:["🥭"],l:"आम"},
+  phool:{bg:"#FCE4EC",m:["🌸"],l:"फूल"},
+  holi:{bg:"#FCE4EC",m:["🎨","🌈"],l:"होली"},
+  battakh:{bg:"#E0F7FA",m:["🦆"],l:"बत्तख"},
+  kavita:{bg:"#F3E5F5",m:["📖","👫"],l:"कविता"},
+  hathi:{bg:"#E8F5E9",m:["🐘"],l:"हाथी"},
+  mor:{bg:"#E8EAF6",m:["🦚"],l:"मोर"},
+  reena:{bg:"#FCE4EC",m:["👧","✍️"],l:"रीना"},
+  raju:{bg:"#E8F5E9",m:["👦","⚽"],l:"राजू"},
+  mohan:{bg:"#E3F2FD",m:["📖","👦"],l:"मोहन"},
+  ram:{bg:"#FFF9E6",m:["👨"],l:"राम"},
+  indore:{bg:"#E3F2FD",m:["🏙️"],l:"इन्दौर"},
+  neem:{bg:"#E8F5E9",m:["🌳"],l:"नीम"},
+  peepal:{bg:"#E8F5E9",m:["🌲"],l:"पीपल"},
+  ek:{bg:"#FFF3E0",m:["1️⃣","⭐"],l:"एक"},
+  do:{bg:"#FFF3E0",m:["2️⃣","🍦","🍦"],l:"दो"},
+  teen:{bg:"#FFF3E0",m:["3️⃣","🍎","🍎","🍎"],l:"तीन"},
+  chaar:{bg:"#FFF3E0",m:["4️⃣","🌸","🌸","🌸","🌸"],l:"चार"},
+  aath:{bg:"#FFF3E0",m:["8️⃣"],l:"आठ"},
+  ubaal:{bg:"#FFF9C4",m:["उ","बा","ल"],l:"उबाल"},
+  kahani:{bg:"#FCE4EC",m:["📖","✨"],l:"कहानी"},
+  gulab:{bg:"#FCE4EC",m:["🌹"],l:"गुलाब"},
+  kamal:{bg:"#E0F7FA",m:["🪷"],l:"कमल"},
+  tamatar:{bg:"#FFEBEE",m:["🍅"],l:"टमाटर"},
+  anaar:{bg:"#FCE4EC",m:["🍎"],l:"अनार"},
+  default:{bg:"#FFF9F0",m:["📚"],l:"हिंदी"},
+};
+
+// ════════════════════════════════════════════════════════
+// SECTIONS definition
+// ════════════════════════════════════════════════════════
+const SECTIONS = [
+  {id:"mcq",   name:"✅ सही विकल्प",  short:"सही विकल्प", em:"✅", badge:"b-mcq",  color:"#E65100"},
+  {id:"qa",    name:"📝 प्रश्न-उत्तर", short:"प्रश्न-उत्तर",em:"📝", badge:"b-qa",   color:"#1B5E20"},
+  {id:"fill",  name:"✏️ खाली भरो",    short:"खाली भरो",   em:"✏️", badge:"b-fill", color:"#1565C0"},
+  {id:"tf",    name:"☑️ सही/गलत",     short:"सही/गलत",    em:"☑️", badge:"b-tf",   color:"#880E4F"},
+  {id:"match", name:"🔗 जोड़ी बनाओ",   short:"जोड़ी बनाओ",  em:"🔗", badge:"b-match",color:"#4A148C"},
+  {id:"kriya", name:"⚡ क्रिया शब्द",  short:"क्रिया",     em:"⚡", badge:"b-kriya",color:"#004D40"},
+  {id:"sangya",name:"👤 संज्ञा",       short:"संज्ञा",     em:"👤", badge:"b-sangya",color:"#BF360C"},
+  {id:"ginti", name:"🔢 गिनती",       short:"गिनती",      em:"🔢", badge:"b-ginti",color:"#0D47A1"},
+  {id:"ped",   name:"🌳 पेड़ों के नाम",short:"पेड़",        em:"🌳", badge:"b-qa",   color:"#1B5E20"},
+  {id:"hathi", name:"🐘 हाथी",        short:"हाथी",       em:"🐘", badge:"b-qa",   color:"#33691E"},
+  {id:"varn",  name:"🔤 वर्ण जोड़ो",   short:"वर्ण जोड़ो",  em:"🔤", badge:"b-varn", color:"#6A1B9A"},
+  {id:"bha",   name:"🔤 'भ' से शब्द", short:"'भ' से शब्द",em:"🔤", badge:"b-varn", color:"#6A1B9A"},
+];
+
+// ════════════════════════════════════════════════════════
+// ALL QUESTIONS
+// ════════════════════════════════════════════════════════
+const ALL_Q = [
+  // MCQ
+  {sec:"mcq",cat:"✅ सही विकल्प",badge:"b-mcq",type:"बहुविकल्पीय प्रश्न",q:"बच्चों ने खिलौने वाले से कितने खिलौने लिए?",opts:["एक","दो","चार","तीन"],ans:1,scene:"khilona"},
+  {sec:"mcq",cat:"✅ सही विकल्प",badge:"b-mcq",type:"बहुविकल्पीय प्रश्न",q:"'अपने लिए प्रयोग करते हैं' — सही शब्द कौन सा है?",opts:["मैं","तुम","तुम्हारा","हम"],ans:0,scene:"baccha"},
+  {sec:"mcq",cat:"✅ सही विकल्प",badge:"b-mcq",type:"बहुविकल्पीय प्रश्न",q:"बच्चा क्या देख रहा था?",opts:["सूरज","चाँद","तारे","बादल"],ans:1,scene:"chand"},
+  {sec:"mcq",cat:"✅ सही विकल्प",badge:"b-mcq",type:"बहुविकल्पीय प्रश्न",q:"नीना के नाना कहाँ गए?",opts:["खेत","बाज़ार","स्कूल","घर"],ans:1,scene:"nana"},
+  {sec:"mcq",cat:"✅ सही विकल्प",badge:"b-mcq",type:"बहुविकल्पीय प्रश्न",q:"व्यक्ति का नाम क्या है?",opts:["दिल्ली","बिल्ली","अमन","रमन"],ans:2,scene:"vyakti"},
+  {sec:"mcq",cat:"✅ सही विकल्प",badge:"b-mcq",type:"बहुविकल्पीय प्रश्न",q:"घर के पास क्या लगा था?",opts:["मेला","झूला","बाज़ार","पेड़"],ans:0,scene:"mela"},
+  // Q&A
+  {sec:"qa",cat:"📝 प्रश्न-उत्तर",badge:"b-qa",type:"प्रश्न-उत्तर",q:"प्रकृति किसके समान है?",opts:["पिता के","माता के","दादी के","नानी के"],ans:1,scene:"prakruti"},
+  {sec:"qa",cat:"📝 प्रश्न-उत्तर",badge:"b-qa",type:"प्रश्न-उत्तर",q:"मेला कहाँ लगा था?",opts:["स्कूल में","बाज़ार में","घर के पास","खेत में"],ans:2,scene:"mela"},
+  {sec:"qa",cat:"📝 प्रश्न-उत्तर",badge:"b-qa",type:"प्रश्न-उत्तर",q:"मुर्गी का नाम क्या था?",opts:["सोना","चाँदी","मेघा","गुड़िया"],ans:2,scene:"murghi"},
+  {sec:"qa",cat:"📝 प्रश्न-उत्तर",badge:"b-qa",type:"प्रश्न-उत्तर",q:"जमाल क्या बनाना चाहता था?",opts:["चावल","दाल","रोटी","खिचड़ी"],ans:2,scene:"jamaal"},
+  {sec:"qa",cat:"📝 प्रश्न-उत्तर",badge:"b-qa",type:"प्रश्न-उत्तर",q:"चाँद किसके पीछे छुप रहा था?",opts:["पेड़ों के","तारों के","बादलों के","पहाड़ों के"],ans:2,scene:"baadal"},
+  {sec:"qa",cat:"📝 प्रश्न-उत्तर",badge:"b-qa",type:"प्रश्न-उत्तर",q:"संज्ञा के उदाहरण में क्या है?",opts:["राम, कलम, दिल्ली","नीला, लाल, हरा","चलना, दौड़ना","मैं, तुम, वह"],ans:0,scene:"ram"},
+  // एक शब्द (also qa section)
+  {sec:"qa",cat:"📝 एक शब्द उत्तर",badge:"b-qa",type:"एक शब्द में उत्तर",q:"मछलियाँ कहाँ रहती हैं?",opts:["आकाश में","पानी में","पेड़ पर","ज़मीन पर"],ans:1,scene:"machli"},
+  {sec:"qa",cat:"📝 एक शब्द उत्तर",badge:"b-qa",type:"एक शब्द में उत्तर",q:"जन्मदिन पर क्या लगाना चाहिए?",opts:["मोमबत्ती","केक","पेड़","झंडा"],ans:2,scene:"janmdin"},
+  {sec:"qa",cat:"📝 एक शब्द उत्तर",badge:"b-qa",type:"एक शब्द में उत्तर",q:"जमाल के मित्र का क्या नाम था?",opts:["राम","श्याम","जय","विजय"],ans:2,scene:"jay"},
+  {sec:"qa",cat:"📝 एक शब्द उत्तर",badge:"b-qa",type:"एक शब्द में उत्तर",q:"भुट्टे कौन से रंग के होते हैं?",opts:["लाल","पीले","हरे","नारंगी"],ans:1,scene:"bhutta"},
+  {sec:"qa",cat:"📝 एक शब्द उत्तर",badge:"b-qa",type:"एक शब्द में उत्तर",q:"बच्चों ने क्या बजाया?",opts:["सितार","तबला","ढोल","बाँसुरी"],ans:2,scene:"dhol"},
+  {sec:"qa",cat:"📝 एक शब्द उत्तर",badge:"b-qa",type:"एक शब्द में उत्तर",q:"कौन चली साँय-साँय?",opts:["बारिश","नदी","हवा","गाड़ी"],ans:2,scene:"hawa"},
+  // FILL
+  {sec:"fill",cat:"✏️ खाली भरो",badge:"b-fill",type:"खाली स्थान भरिए",q:"साली ने धरती में ___ बोया।",blank:true,opts:["चीज़","बीज","पत्थर","पानी"],ans:1,scene:"beej"},
+  {sec:"fill",cat:"✏️ खाली भरो",badge:"b-fill",type:"खाली स्थान भरिए",q:"नाना खूब सारे ___ लाए।",blank:true,opts:["आम","अमरूद","भुट्टे","केले"],ans:2,scene:"bhutta"},
+  {sec:"fill",cat:"✏️ खाली भरो",badge:"b-fill",type:"खाली स्थान भरिए",q:"___ एक सब्जी है।",blank:true,opts:["अनार","पालक","आम","केला"],ans:1,scene:"palak"},
+  {sec:"fill",cat:"✏️ खाली भरो",badge:"b-fill",type:"खाली स्थान भरिए",q:"___ आसमान में उड़ती है।",blank:true,opts:["बिल्ली","मछली","चिड़िया","गाय"],ans:2,scene:"chidiya"},
+  {sec:"fill",cat:"✏️ खाली भरो",badge:"b-fill",type:"खाली स्थान भरिए",q:"___ जंगल का राजा है।",blank:true,opts:["बकरा","हाथी","शेर","भालू"],ans:2,scene:"sher"},
+  {sec:"fill",cat:"✏️ खाली भरो",badge:"b-fill",type:"खाली स्थान भरिए",q:"हवा साँय-साँय ___ है।",blank:true,opts:["बैठती","सोती","चलती","उड़ती"],ans:2,scene:"hawa"},
+  // TRUE/FALSE
+  {sec:"tf",cat:"☑️ सही / गलत",badge:"b-tf",type:"सही / गलत बताइए",q:"होली रंगों का त्योहार है।",opts:["सही ✅","गलत ❌","पता नहीं","शायद"],ans:0,scene:"holi"},
+  {sec:"tf",cat:"☑️ सही / गलत",badge:"b-tf",type:"सही / गलत बताइए",q:"चाँद दिन में निकलता है।",opts:["सही ✅","गलत ❌","पता नहीं","शायद"],ans:1,scene:"chand"},
+  {sec:"tf",cat:"☑️ सही / गलत",badge:"b-tf",type:"सही / गलत बताइए",q:"बत्तख का नाम बरखा था।",opts:["गलत ❌","सही ✅","पता नहीं","शायद"],ans:1,scene:"battakh"},
+  {sec:"tf",cat:"☑️ सही / गलत",badge:"b-tf",type:"सही / गलत बताइए",q:"कविता में मित्रों की टोली नहीं निकली।",opts:["सही ✅","गलत ❌","पता नहीं","शायद"],ans:1,scene:"kavita"},
+  {sec:"tf",cat:"☑️ सही / गलत",badge:"b-tf",type:"सही / गलत बताइए",q:"बच्ची को पूरी दुनिया प्यारी लगती है।",opts:["गलत ❌","पता नहीं","सही ✅","शायद"],ans:2,scene:"baccha"},
+  {sec:"tf",cat:"☑️ सही / गलत",badge:"b-tf",type:"सही / गलत बताइए",q:"मुर्गी का नाम मेघा था।",opts:["गलत ❌","शायद","पता नहीं","सही ✅"],ans:3,scene:"murghi"},
+  // MATCH
+  {sec:"match",cat:"🔗 जोड़ी बनाओ",badge:"b-match",type:"सही जोड़ी बनाइए",q:"'पेंसिल' की सही जोड़ी क्या है?",opts:["घर","लड़का","✏️ पेंसिल (लिखने का काम)","फूल"],ans:2,scene:"pensil"},
+  {sec:"match",cat:"🔗 जोड़ी बनाओ",badge:"b-match",type:"सही जोड़ी बनाइए",q:"'घर' की सही जोड़ी क्या है?",opts:["किताब","🏠 घर (रहने की जगह)","आम","पेंसिल"],ans:1,scene:"ghar"},
+  {sec:"match",cat:"🔗 जोड़ी बनाओ",badge:"b-match",type:"सही जोड़ी बनाइए",q:"'लड़का' की सही जोड़ी क्या है?",opts:["घर","फूल","पेंसिल","👦 लड़का (इंसान)"],ans:3,scene:"ladka"},
+  {sec:"match",cat:"🔗 जोड़ी बनाओ",badge:"b-match",type:"सही जोड़ी बनाइए",q:"'किताब' की सही जोड़ी क्या है?",opts:["📚 किताब (पढ़ने की चीज़)","घर","लड़का","आम"],ans:0,scene:"kitaab"},
+  {sec:"match",cat:"🔗 जोड़ी बनाओ",badge:"b-match",type:"सही जोड़ी बनाइए",q:"'आम' की सही जोड़ी क्या है?",opts:["घर","पेंसिल","🥭 आम (एक फल)","लड़का"],ans:2,scene:"aam"},
+  {sec:"match",cat:"🔗 जोड़ी बनाओ",badge:"b-match",type:"सही जोड़ी बनाइए",q:"'फूल' की सही जोड़ी क्या है?",opts:["लड़का","किताब","घर","🌸 फूल (बाग में होता है)"],ans:3,scene:"phool"},
+  // KRIYA
+  {sec:"kriya",cat:"⚡ क्रिया शब्द",badge:"b-kriya",type:"क्रिया शब्द पहचानिए",q:"'हाथी धीरे-धीरे ___ है' — क्रिया शब्द कौन सा है?",opts:["हाथी","धीरे","चलता","धीरे-धीरे"],ans:2,scene:"hathi"},
+  {sec:"kriya",cat:"⚡ क्रिया शब्द",badge:"b-kriya",type:"क्रिया शब्द पहचानिए",q:"'मोर ___ रहे हैं' — क्रिया शब्द कौन सा है?",opts:["मोर","रहे","हैं","नाच"],ans:3,scene:"mor"},
+  {sec:"kriya",cat:"⚡ क्रिया शब्द",badge:"b-kriya",type:"क्रिया शब्द पहचानिए",q:"'रीना पत्र ___ रही है' — क्रिया शब्द कौन सा है?",opts:["रीना","पत्र","रही","लिख"],ans:3,scene:"reena"},
+  {sec:"kriya",cat:"⚡ क्रिया शब्द",badge:"b-kriya",type:"क्रिया शब्द पहचानिए",q:"'राजू गेंद से ___ रहा है' — क्रिया शब्द कौन सा है?",opts:["राजू","गेंद","से","खेल"],ans:3,scene:"raju"},
+  {sec:"kriya",cat:"⚡ क्रिया शब्द",badge:"b-kriya",type:"क्रिया शब्द पहचानिए",q:"'मोहन ___ रहा है' — क्रिया शब्द कौन सा है?",opts:["मोहन","रहा","है","पढ़"],ans:3,scene:"mohan"},
+  // SANGYA
+  {sec:"sangya",cat:"👤 संज्ञा",badge:"b-sangya",type:"संज्ञा पहचानिए",q:"'राम, रानी, मोहन' — ये किसके नाम हैं?",opts:["वस्तु","स्थान","व्यक्ति","जानवर"],ans:2,scene:"ram"},
+  {sec:"sangya",cat:"👤 संज्ञा",badge:"b-sangya",type:"संज्ञा पहचानिए",q:"'पुस्तक, कार, गेंद' — ये किसके नाम हैं?",opts:["स्थान","व्यक्ति","जानवर","वस्तु"],ans:3,scene:"kitaab"},
+  {sec:"sangya",cat:"👤 संज्ञा",badge:"b-sangya",type:"संज्ञा पहचानिए",q:"'इन्दौर, घर, स्कूल' — ये किसके नाम हैं?",opts:["वस्तु","व्यक्ति","स्थान","जानवर"],ans:2,scene:"indore"},
+  {sec:"sangya",cat:"👤 संज्ञा",badge:"b-sangya",type:"संज्ञा पहचानिए",q:"'दिल्ली' किस प्रकार की संज्ञा है?",opts:["वस्तु","व्यक्ति","जानवर","स्थान"],ans:3,scene:"indore"},
+  {sec:"sangya",cat:"👤 संज्ञा",badge:"b-sangya",type:"संज्ञा पहचानिए",q:"संज्ञा किसे कहते हैं?",opts:["क्रिया के नाम को","किसी व्यक्ति, वस्तु या स्थान के नाम को","रंग के नाम को","गिनती को"],ans:1,scene:"default"},
+  // GINTI
+  {sec:"ginti",cat:"🔢 गिनती",badge:"b-ginti",type:"गिनती बताइए",q:"एक ⭐ — हिंदी में:",opts:["दो","एक","तीन","चार"],ans:1,scene:"ek"},
+  {sec:"ginti",cat:"🔢 गिनती",badge:"b-ginti",type:"गिनती बताइए",q:"🍦🍦 — कितने हैं?",opts:["एक","तीन","दो","चार"],ans:2,scene:"do"},
+  {sec:"ginti",cat:"🔢 गिनती",badge:"b-ginti",type:"गिनती बताइए",q:"🍎🍎🍎 — कितने हैं?",opts:["दो","तीन","चार","पाँच"],ans:1,scene:"teen"},
+  {sec:"ginti",cat:"🔢 गिनती",badge:"b-ginti",type:"गिनती बताइए",q:"🌸🌸🌸🌸 — कितने हैं?",opts:["तीन","पाँच","दो","चार"],ans:3,scene:"chaar"},
+  {sec:"ginti",cat:"🔢 गिनती",badge:"b-ginti",type:"गिनती बताइए",q:"आठ (8) को हिंदी में कहते हैं:",opts:["सात","नौ","छह","आठ"],ans:3,scene:"aath"},
+  // PED
+  {sec:"ped",cat:"🌳 पेड़ों के नाम",badge:"b-qa",type:"पेड़ों के नाम",q:"'नीम' क्या है?",opts:["एक फल","एक सब्जी","एक पेड़","एक फूल"],ans:2,scene:"neem"},
+  {sec:"ped",cat:"🌳 पेड़ों के नाम",badge:"b-qa",type:"पेड़ों के नाम",q:"इनमें से कौन सा एक पेड़ है?",opts:["गाजर","आलू","पीपल","टमाटर"],ans:2,scene:"peepal"},
+  {sec:"ped",cat:"🌳 पेड़ों के नाम",badge:"b-qa",type:"पेड़ों के नाम",q:"'इमली' क्या है?",opts:["एक पेड़","एक जानवर","एक रंग","एक गाना"],ans:0,scene:"neem"},
+  {sec:"ped",cat:"🌳 पेड़ों के नाम",badge:"b-qa",type:"पेड़ों के नाम",q:"इनमें से कौन सा पेड़ नहीं है?",opts:["नीम","पीपल","अशोक","गाजर"],ans:3,scene:"neem"},
+  // HATHI
+  {sec:"hathi",cat:"🐘 हाथी",badge:"b-qa",type:"हाथी के बारे में",q:"हाथी के कितने पैर होते हैं?",opts:["दो","छह","चार","आठ"],ans:2,scene:"hathi"},
+  {sec:"hathi",cat:"🐘 हाथी",badge:"b-qa",type:"हाथी के बारे में",q:"हाथी की कितनी सूँड होती है?",opts:["दो","तीन","चार","एक"],ans:3,scene:"hathi"},
+  {sec:"hathi",cat:"🐘 हाथी",badge:"b-qa",type:"हाथी के बारे में",q:"हाथी की कितनी टाँगें होती हैं?",opts:["दो","छह","तीन","चार"],ans:3,scene:"hathi"},
+  {sec:"hathi",cat:"🐘 हाथी",badge:"b-qa",type:"हाथी के बारे में",q:"हाथी गन्ना कैसे खाता है?",opts:["पैर से","मुँह से","सूँड से","पूँछ से"],ans:2,scene:"hathi"},
+  // VARN
+  {sec:"varn",cat:"🔤 वर्ण जोड़ो",badge:"b-varn",type:"वर्ण जोड़कर शब्द बनाइए",q:"उ + बा + ल = ?",opts:["उबला","उबाल","उबाला","उबल"],ans:1,scene:"ubaal"},
+  {sec:"varn",cat:"🔤 वर्ण जोड़ो",badge:"b-varn",type:"वर्ण जोड़कर शब्द बनाइए",q:"क + हा + नी = ?",opts:["कहान","कहानी","कहाने","कहानियाँ"],ans:1,scene:"kahani"},
+  {sec:"varn",cat:"🔤 वर्ण जोड़ो",badge:"b-varn",type:"वर्ण जोड़कर शब्द बनाइए",q:"गु + ला + ब = ?",opts:["गुलाबी","गुलाब","गुला","गुलाबा"],ans:1,scene:"gulab"},
+  {sec:"varn",cat:"🔤 वर्ण जोड़ो",badge:"b-varn",type:"वर्ण जोड़कर शब्द बनाइए",q:"क + म + ल = ?",opts:["कमला","कमले","कमल","कमली"],ans:2,scene:"kamal"},
+  {sec:"varn",cat:"🔤 वर्ण जोड़ो",badge:"b-varn",type:"वर्ण जोड़कर शब्द बनाइए",q:"ट + मा + ट + र = ?",opts:["टमाटर","टमाटरा","टमाटरी","टमाटरे"],ans:0,scene:"tamatar"},
+  // BHA
+  {sec:"bha",cat:"🔤 'भ' से शब्द",badge:"b-varn",type:"'भ' से शुरू होने वाले शब्द",q:"इनमें से कौन सा 'भ' से शुरू होता है?",opts:["शाला","कमल","भालू","पानी"],ans:2,scene:"default"},
+  {sec:"bha",cat:"🔤 'भ' से शब्द",badge:"b-varn",type:"'भ' से शुरू होने वाले शब्द",q:"'भारत' किस वर्ण से शुरू होता है?",opts:["ब","प","भ","म"],ans:2,scene:"default"},
+  {sec:"bha",cat:"🔤 'भ' से शब्द",badge:"b-varn",type:"'भ' से शुरू होने वाले शब्द",q:"'भोजन' का मतलब क्या होता है?",opts:["पानी","खाना","कपड़ा","घर"],ans:1,scene:"jamaal"},
+  {sec:"bha",cat:"🔤 'भ' से शब्द",badge:"b-varn",type:"'भ' से शुरू होने वाले शब्द",q:"इनमें से 'भ' से शुरू होने वाला शब्द कौन सा है?",opts:["कहानी","गुलाब","भाषा","टमाटर"],ans:2,scene:"default"},
+];
+
+// ════════════════════════════════════════════════════════
+// CONSTANTS
+// ════════════════════════════════════════════════════════
+const LETTERS=['अ','ब','स','द'];
+const PRAISES=['🎉 शाबाश! बिल्कुल सही!','⭐ वाह! बहुत अच्छा!','🌟 बहुत बढ़िया!','🏆 बहुत होशियार हो!','🎊 कमाल! एकदम सही!','💫 बहुत अच्छा जवाब!','🥳 जादू कर दिया!','✨ बहुत शानदार!','🌈 वाह! मज़ा आ गया!','🎯 एकदम पक्का!'];
+const MASCOTS=['🦚','🐘','🦁','🐯','🦋','🦜','🐬','🦅','🌺'];
+const TROPHIES={90:'🏆',70:'🥇',50:'🥈',0:'🌈'};
+
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+let currentMode='all', questions=[], qIdx=0, totalC=0, totalW=0, catStats={};
+let currentScreen='home';
+
+// ════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════
+function showScreen(name){
+  ['home','quiz','result','profile','history'].forEach(s=>{
+    document.getElementById(s+'Screen').classList.remove('active');
+  });
+  document.getElementById(name+'Screen').classList.add('active');
+  currentScreen=name;
+  // update nav
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  const nb=document.getElementById('nav-'+name);
+  if(nb) nb.classList.add('active');
+  // hide nav during quiz/result
+  document.getElementById('mainNav').style.display=['quiz','result'].includes(name)?'none':'flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(name==='profile') renderProfile();
+  if(name==='history') renderHistory();
+  if(name==='home') renderSectionGrid();
+}
+
+function goHome(){showScreen('home');}
+function confirmBack(){
+  if(confirm('क्विज़ छोड़ें? आपकी प्रगति खो जाएगी।')) goHome();
+}
+
+// ════════════════════════════════════════════════════════
+// HOME — section grid
+// ════════════════════════════════════════════════════════
+function renderSectionGrid(){
+  const grid=document.getElementById('secGrid');
+  grid.innerHTML='';
+  SECTIONS.forEach(sec=>{
+    const qs=ALL_Q.filter(q=>q.sec===sec.id);
+    const total=qs.length;
+    const cs=DB.catStats[sec.id]||{correct:0,total:0};
+    const pct=cs.total>0?Math.round((cs.correct/cs.total)*100):null;
+    const card=document.createElement('button');
+    card.className='sec-card';
+    card.style.setProperty('--sec-color',sec.color);
+    card.onclick=()=>startQuiz(sec.id);
+    const barW=pct!==null?pct:0;
+    const barColor=pct>=80?'#138808':pct>=50?'#FF6B2B':'#EF5350';
+    const pctBadge=pct!==null?`<span class="sc-pct" style="background:${barColor}22;color:${barColor}">${pct}%</span>`:'';
+    card.innerHTML=`
+      ${pctBadge}
+      <span class="sc-em">${sec.em}</span>
+      <span class="sc-name">${sec.short}</span>
+      <span class="sc-count">${total} प्रश्न</span>
+      <div class="sc-bar"><div class="sec-bar-fill" style="width:${barW}%;background:${barColor}"></div></div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// QUIZ ENGINE
+// ════════════════════════════════════════════════════════
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+function startQuiz(mode){
+  currentMode=mode;
+  questions=mode==='all'?shuffle([...ALL_Q]):shuffle(ALL_Q.filter(q=>q.sec===mode));
+  qIdx=0;totalC=0;totalW=0;catStats={};
+  buildStars();
+  const sec=SECTIONS.find(s=>s.id===mode);
+  document.getElementById('topbarTitle').textContent=mode==='all'?'📚 सभी प्रश्न':(sec?sec.name:'क्विज़');
+  showScreen('quiz');
+  renderQ();
+}
+
+function buildStars(){
+  const r=document.getElementById('starsRow');r.innerHTML='';
+  const n=Math.min(questions.length,30);
+  for(let i=0;i<n;i++){
+    const s=document.createElement('span');s.className='ms';s.id='ms'+i;s.textContent='⭐';r.appendChild(s);
+  }
+}
+
+function renderQ(){
+  const q=questions[qIdx];
+  const pct=(qIdx/questions.length)*100;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`प्रश्न ${qIdx+1} / ${questions.length}`;
+  document.getElementById('qTypeTag').textContent=q.type||'';
+  const badge=document.getElementById('catBadge');
+  badge.textContent=q.cat; badge.className='cat-badge '+q.badge;
+  const qt=document.getElementById('qText');
+  if(q.blank){qt.innerHTML=q.q.replace('___','<span class="q-blank">___</span>');}
+  else{qt.textContent=q.q;}
+  renderScene(q.scene||'default');
+  const idxs=shuffle([0,1,2,3]);
+  const wrap=document.getElementById('optsWrap');wrap.innerHTML='';
+  idxs.forEach((origIdx,dispIdx)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.dataset.orig=origIdx;
+    btn.dataset.iscorrect=(origIdx===q.ans)?'1':'0';
+    btn.innerHTML=`<span class="opt-letter">${LETTERS[dispIdx]}</span><span class="opt-txt">${q.opts[origIdx]}</span><span class="opt-result">${origIdx===q.ans?'✅':'❌'}</span>`;
+    btn.addEventListener('click',()=>pick(btn,origIdx===q.ans));
+    wrap.appendChild(btn);
+  });
+  document.getElementById('fbBox').className='fb-box';
+  document.getElementById('fbBox').textContent='';
+  const nb=document.getElementById('nextBtn');
+  nb.classList.remove('show');
+  nb.textContent=(qIdx===questions.length-1)?'🏁 परिणाम देखो!':'आगे बढ़ो ➡️';
+  const card=document.querySelector('.q-card');
+  card.style.animation='none';requestAnimationFrame(()=>{card.style.animation='cardIn .4s cubic-bezier(.34,1.56,.64,1)';});
+}
+
+function renderScene(key){
+  const sc=S[key]||S.default;
+  const img=document.getElementById('visImg');
+  img.style.background=sc.bg;
+  document.getElementById('visLbl').textContent=sc.l||'';
+  const vs=document.getElementById('visScene');vs.innerHTML='';
+  sc.m.forEach((em,i)=>{
+    const sp=document.createElement('span');
+    sp.className=sc.m.length===1?'em-big':'em-med';
+    sp.textContent=em;sp.style.animationDelay=(i*.12)+'s';
+    vs.appendChild(sp);
+  });
+}
+
+function pick(btn,isCorrect){
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('fbBox');
+  const q=questions[qIdx];
+  if(!catStats[q.cat])catStats[q.cat]={correct:0,total:0};
+  catStats[q.cat].total++;
+  if(!catStats[q.sec||q.cat])catStats[q.sec||q.cat]={correct:0,total:0};
+  // also track by section id
+  const secId=q.sec;
+  if(secId){
+    if(!catStats['_sec_'+secId])catStats['_sec_'+secId]={correct:0,total:0};
+    catStats['_sec_'+secId].total++;
+  }
+  if(isCorrect){
+    btn.classList.add('correct-ans');
+    totalC++;
+    catStats[q.cat].correct++;
+    if(secId)catStats['_sec_'+secId].correct++;
+    fb.textContent=PRAISES[Math.floor(Math.random()*PRAISES.length)];
+    fb.className='fb-box fb-ok';
+    const idx=Math.min(qIdx,29);
+    const e=document.getElementById('ms'+idx);if(e)e.classList.add('lit');
+    burst(btn);
+  } else {
+    btn.classList.add('wrong-ans');
+    totalW++;
+    fb.textContent='😊 अरे! सही जवाब हरे रंग में दिख रहा है!';
+    fb.className='fb-box fb-no';
+    document.querySelectorAll('.opt-btn').forEach(b=>{if(b.dataset.iscorrect==='1')b.classList.add('show-correct');});
+  }
+  document.getElementById('cScore').textContent=totalC;
+  document.getElementById('wScore').textContent=totalW;
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function nextQ(){
+  qIdx++;
+  if(qIdx>=questions.length){showResult();return;}
+  renderQ();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ════════════════════════════════════════════════════════
+// RESULT
+// ════════════════════════════════════════════════════════
+function showResult(){
+  const pct=Math.round((totalC/questions.length)*100);
+  document.getElementById('rC').textContent=totalC;
+  document.getElementById('rW').textContent=totalW;
+  document.getElementById('rT').textContent=questions.length;
+  document.getElementById('rP').textContent=pct+'%';
+  let tKey=0;
+  [90,70,50].forEach(k=>{if(pct>=k&&tKey<k)tKey=k;});
+  const trophy=pct>=90?'🏆':pct>=70?'🥇':pct>=50?'🥈':'🌈';
+  const title=pct>=90?'शाबाश! तुम चैंपियन हो!':pct>=70?'बहुत बढ़िया!':pct>=50?'अच्छा प्रयास!':'हिम्मत रखो!';
+  const sub=pct>=90?'अद्भुत! हिंदी के सितारे हो! 🌟':pct>=70?'बहुत अच्छा किया! ऐसे ही पढ़ते रहो! 💪':pct>=50?'और मेहनत करो, तुम कर सकते हो! 📚':'हर बार पढ़ने से बेहतर होते हो! 💛';
+  const stars=pct>=90?'⭐⭐⭐⭐⭐':pct>=70?'⭐⭐⭐⭐':pct>=50?'⭐⭐⭐':'⭐⭐';
+  document.getElementById('resTrophy').textContent=trophy;
+  document.getElementById('resTitle').textContent=title;
+  document.getElementById('resSub').textContent=sub;
+  document.getElementById('resStars').textContent=stars;
+  const bd=document.getElementById('bdWrap');bd.innerHTML='';
+  Object.entries(catStats).filter(([k])=>!k.startsWith('_sec_')).forEach(([cat,d])=>{
+    const p=d.total>0?Math.round((d.correct/d.total)*100):0;
+    const row=document.createElement('div');row.className='bd-row';
+    row.innerHTML=`<div class="bd-name">${cat}</div><div class="bd-bar-w"><div class="bd-bar" style="width:${p}%;background:${p>=80?'#138808':p>=50?'#FF6B2B':'#EF5350'}"></div></div><div class="bd-sc">${d.correct}/${d.total}</div>`;
+    bd.appendChild(row);
+  });
+  // Save to history
+  saveResult(pct,trophy);
+  // Update global cat stats
+  Object.keys(catStats).filter(k=>k.startsWith('_sec_')).forEach(k=>{
+    const secId=k.replace('_sec_','');
+    if(!DB.catStats[secId])DB.catStats[secId]={correct:0,total:0};
+    DB.catStats[secId].correct+=catStats[k].correct;
+    DB.catStats[secId].total+=catStats[k].total;
+  });
+  saveData(DB);
+  showScreen('result');
+  for(let i=0;i<22;i++){
+    setTimeout(()=>{
+      const p=document.createElement('div');p.className='burst-p';
+      p.textContent=['🎊','🎉','⭐','🌟','✨','💫','🏆','🌈'][Math.floor(Math.random()*8)];
+      p.style.left=Math.random()*window.innerWidth+'px';p.style.top=Math.random()*window.innerHeight+'px';
+      p.style.setProperty('--dx',(Math.random()-.5)*240+'px');p.style.setProperty('--dy',(Math.random()-.5)*240+'px');
+      document.getElementById('burst').appendChild(p);setTimeout(()=>p.remove(),1200);
+    },i*80);
+  }
+}
+
+function saveResult(pct,trophy){
+  const sec=SECTIONS.find(s=>s.id===currentMode);
+  const entry={
+    date:new Date().toLocaleDateString('hi-IN',{day:'numeric',month:'short',year:'numeric'}),
+    time:new Date().toLocaleTimeString('hi-IN',{hour:'2-digit',minute:'2-digit'}),
+    mode:currentMode,
+    modeLabel:currentMode==='all'?'पूरी क्विज़':(sec?sec.name:'—'),
+    correct:totalC,wrong:totalW,total:questions.length,pct,trophy,
+    cats:Object.entries(catStats).filter(([k])=>!k.startsWith('_sec_')).map(([k,v])=>({name:k,correct:v.correct,total:v.total}))
+  };
+  DB.history.unshift(entry);
+  if(DB.history.length>30)DB.history=DB.history.slice(0,30);
+  saveData(DB);
+}
+
+function playAgain(){startQuiz(currentMode);}
+
+// ════════════════════════════════════════════════════════
+// PROFILE
+// ════════════════════════════════════════════════════════
+const BADGES=[
+  {min:0,label:'🌱 नया शुरुआत'},
+  {min:3,label:'📚 पाठशाला का छात्र'},
+  {min:10,label:'⭐ उभरता सितारा'},
+  {min:20,label:'🏅 हिंदी प्रेमी'},
+  {min:50,label:'🏆 हिंदी चैंपियन'},
+];
+function getBadge(total){
+  let b=BADGES[0];
+  BADGES.forEach(bg=>{if(total>=bg.min)b=bg;});
+  return b.label;
+}
+const AVATARS=['🦚','🐘','🦁','🐯','🦋','🦜','🐬','🦅','🌺','🎪','🎭','🎨'];
+
+function renderProfile(){
+  const name=DB.name||'बच्चा';
+  document.getElementById('profName').textContent=name;
+  document.getElementById('nameInput').value=name;
+  const total=DB.history.length;
+  const avIdx=Math.abs([...name].reduce((a,c)=>a+c.charCodeAt(0),0))%AVATARS.length;
+  document.getElementById('profAvatar').textContent=AVATARS[avIdx];
+  document.getElementById('profBadge').textContent=getBadge(total);
+  document.getElementById('stTotal').textContent=total;
+  const avgs=DB.history.map(h=>h.pct);
+  const avg=avgs.length?Math.round(avgs.reduce((a,b)=>a+b,0)/avgs.length):0;
+  const best=avgs.length?Math.max(...avgs):0;
+  document.getElementById('stAvg').textContent=avg+'%';
+  document.getElementById('stBest').textContent=best+'%';
+  // per section perf
+  const pw=document.getElementById('perfWrap');pw.innerHTML='';
+  SECTIONS.forEach(sec=>{
+    const cs=DB.catStats[sec.id]||{correct:0,total:0};
+    if(cs.total===0)return;
+    const pct=Math.round((cs.correct/cs.total)*100);
+    const color=pct>=80?'#138808':pct>=50?'#FF6B2B':'#EF5350';
+    const row=document.createElement('div');row.className='perf-row';
+    row.innerHTML=`<div class="perf-top"><span class="perf-em">${sec.em}</span><span class="perf-name">${sec.short}</span><span class="perf-pct" style="color:${color}">${pct}%</span></div><div class="perf-bar-w"><div class="perf-bar" style="width:${pct}%;background:${color}"></div></div><div class="perf-sub">${cs.correct} सही / ${cs.total} कुल प्रयास</div>`;
+    pw.appendChild(row);
+  });
+  if(pw.innerHTML===''){pw.innerHTML='<div style="text-align:center;padding:20px;color:var(--soft);font-weight:700;font-size:.88rem;">अभी तक कोई डेटा नहीं। पहले क्विज़ खेलो! 🎮</div>';}
+}
+
+function saveName(){
+  const val=document.getElementById('nameInput').value.trim();
+  if(!val)return;
+  DB.name=val;saveData(DB);
+  document.getElementById('profName').textContent=val;
+  const avIdx=Math.abs([...val].reduce((a,c)=>a+c.charCodeAt(0),0))%AVATARS.length;
+  document.getElementById('profAvatar').textContent=AVATARS[avIdx];
+  document.getElementById('profBadge').textContent=getBadge(DB.history.length);
+  showToast('✅ नाम सेव हो गया!');
+}
+
+// ════════════════════════════════════════════════════════
+// HISTORY
+// ════════════════════════════════════════════════════════
+function renderHistory(){
+  const wrap=document.getElementById('histWrap');wrap.innerHTML='';
+  const clearBtn=document.getElementById('clearBtn');
+  if(DB.history.length===0){
+    wrap.innerHTML=`<div class="hist-empty"><span class="he-em">📋</span><p>अभी तक कोई क्विज़ नहीं हुई।<br>पहले क्विज़ खेलो!</p></div>`;
+    clearBtn.style.display='none';return;
+  }
+  clearBtn.style.display='block';
+  DB.history.forEach((h,i)=>{
+    const card=document.createElement('div');
+    card.className='hist-card';card.style.animationDelay=(i*.05)+'s';
+    const barC=h.pct>=80?'#138808':h.pct>=50?'#FF6B2B':'#EF5350';
+    const chips=h.cats?h.cats.slice(0,4).map(c=>`<span class="hc-chip">${c.name}: ${c.correct}/${c.total}</span>`).join(''):'';
+    const modeClass=h.mode==='all'?'full':'section';
+    card.innerHTML=`
+      <div class="hc-top">
+        <span class="hc-date">📅 ${h.date} ${h.time||''}</span>
+        <span class="hc-mode ${modeClass}">${h.modeLabel}</span>
+      </div>
+      <div class="hc-score-row">
+        <span class="hc-trophy">${h.trophy}</span>
+        <div class="hc-score-info">
+          <div class="hc-pct" style="color:${barC}">${h.pct}%</div>
+          <div class="hc-detail">✅ ${h.correct} सही  ❌ ${h.wrong} गलत  📝 ${h.total} कुल</div>
+        </div>
+        <div class="hc-bar-w"><div class="hc-bar" style="width:${h.pct}%;background:${barC}"></div></div>
+      </div>
+      ${chips?`<div class="hc-cats">${chips}</div>`:''}
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+function clearHistory(){
+  if(!confirm('सारे परिणाम हटाएँ? यह वापस नहीं होगा।'))return;
+  DB.history=[];DB.catStats={};saveData(DB);
+  renderHistory();showToast('🗑️ सारे परिणाम हटा दिए गए।');
+}
+
+// ════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════
+function burst(el){
+  const r=el.getBoundingClientRect();
+  const cx=r.left+r.width/2,cy=r.top+r.height/2;
+  const ems=['⭐','✨','🌟','💫','🎉','🎊'];
+  for(let i=0;i<8;i++){
+    const p=document.createElement('div');p.className='burst-p';
+    p.textContent=ems[Math.floor(Math.random()*ems.length)];
+    const a=(i/8)*Math.PI*2,d=60+Math.random()*70;
+    p.style.left=cx+'px';p.style.top=cy+'px';
+    p.style.setProperty('--dx',Math.cos(a)*d+'px');p.style.setProperty('--dy',Math.sin(a)*d+'px');
+    document.getElementById('burst').appendChild(p);setTimeout(()=>p.remove(),1100);
+  }
+}
+
+let toastT;
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 20px;border-radius:20px;font-family:Nunito,sans-serif;font-weight:700;font-size:.85rem;z-index:9999;transition:opacity .3s;white-space:nowrap;';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(toastT);toastT=setTimeout(()=>t.style.opacity='0',2500);
+}
+
+// floating bg emojis
+(function(){
+  const ems=['🌸','⭐','🌟','🎈','🦋','🌺','💫'];
+  for(let i=0;i<10;i++){
+    const el=document.createElement('div');el.className='float-em';
+    el.textContent=ems[Math.floor(Math.random()*ems.length)];
+    el.style.left=Math.random()*100+'vw';
+    el.style.animationDuration=(10+Math.random()*12)+'s';
+    el.style.animationDelay=-(Math.random()*24)+'s';
+    el.style.fontSize=(.6+Math.random()*.6)+'rem';
+    document.body.appendChild(el);
+  }
+})();
+
+// Init
+document.getElementById('hMascot').textContent=MASCOTS[Math.floor(Math.random()*MASCOTS.length)];
+renderSectionGrid();
+if(DB.name)document.getElementById('profName').textContent=DB.name;
+</script>
+</body>
+</html>
